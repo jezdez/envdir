@@ -1,7 +1,7 @@
 envdir
 ======
 
-.. image:: https://secure.travis-ci.org/jezdez/envdir.png
+.. image:: https://api.travis-ci.org/jezdez/envdir.png
    :alt: Build Status
    :target: https://travis-ci.org/jezdez/envdir
 
