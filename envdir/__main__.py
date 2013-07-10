@@ -43,14 +43,12 @@ class Envdir(object):
                 value = env_file.readline().strip()
                 yield name, value
 
-    def run(self, args):
-        options, args = self.parser.parse_args(args)
+    def read(self, path=None):
+        if path is None:
+            frame = sys._getframe()
+            callerdir = os.path.dirname(frame.f_back.f_code.co_filename)
+            path = os.path.join(callerdir, 'envdir')
 
-        if len(args) < 2:
-            self.parser.error("incorrect number of arguments")
-            self.parser.print_usage()
-
-        path = args[0]
         real_path = os.path.realpath(os.path.expanduser(path))
         if not os.path.exists(real_path):
             # use 111 error code to adher to envdir's standard
@@ -61,6 +59,15 @@ class Envdir(object):
                 os.environ.setdefault(name, value)
             elif name in os.environ:
                 del os.environ[name]
+
+    def main(self, args):
+        options, args = self.parser.parse_args(args)
+
+        if len(args) < 2:
+            self.parser.error("incorrect number of arguments")
+            self.parser.print_usage()
+
+        self.read(args[0])
 
         # the args to call later
         child_args = args[1:]
@@ -78,10 +85,4 @@ class Envdir(object):
         if process.wait() != 0:
             self.parser.exit(process.returncode, '')
 
-
-def main():
-    envdir = Envdir()
-    envdir.run(sys.argv[1:])
-
-if __name__ == '__main__':
-    main()
+envdir = Envdir()

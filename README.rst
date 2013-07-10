@@ -56,6 +56,20 @@ Quoting the envdir documentation:
 
 Alternatively you can also use the ``python -m envdir`` form to call envdir.
 
+To use envdir **in a Python file** (e.g. Django's ``manage.py``) you can use::
+
+    import envdir
+    envdir.read()
+
+envdir will try to find an ``envdir`` directory next to the file you modified.
+
+It's also possible to explicitly pass the path to the envdir::
+
+    import os
+    import envdir
+
+    envdir.read('/etc/mysite/envdir')
+
 Feedback
 --------
 
@@ -67,6 +81,11 @@ Say thanks at https://www.gittip.com/jezdez/.
 
 Changelog
 ---------
+
+0.2 (07/10/2013)
+^^^^^^^^^^^^^^^^
+
+* Added ability to use envdir from Python.
 
 0.1 (07/10/2013)
 ^^^^^^^^^^^^^^^^
