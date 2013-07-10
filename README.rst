@@ -28,6 +28,9 @@ or::
 Usage
 -----
 
+Command line
+^^^^^^^^^^^^
+
 Quoting the envdir documentation:
 
     envdir runs another program with environment modified according to files in a specified directory.
@@ -55,6 +58,9 @@ Quoting the envdir documentation:
     its exit code is the same as that of child.
 
 Alternatively you can also use the ``python -m envdir`` form to call envdir.
+
+Python
+^^^^^^
 
 To use envdir **in a Python file** (e.g. Django's ``manage.py``) you can use::
 
