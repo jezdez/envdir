@@ -58,7 +58,7 @@ environment variables can be found on the 12factor_ site.
 Why?
 ----
 
-Because envdir small enough that it shouldn't be tied to a bigger
+Because envdir is small enough that it shouldn't be tied to a bigger
 software distribution like daemontools that requires a compiler.
 
 Also, this Python port can easily be used on Windows, not only UNIX systems.
