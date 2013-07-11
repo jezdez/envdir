@@ -86,3 +86,10 @@ class Envdir(object):
             self.parser.exit(process.returncode, '')
 
 envdir = Envdir()
+
+
+def main():
+    envdir.main(sys.argv[1:])
+
+if __name__ == '__main__':
+    main()
