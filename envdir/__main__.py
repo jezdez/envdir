@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 
-__version__ = '0.2'
+__version__ = '0.2.1'
 
 
 class EnvOptionParser(optparse.OptionParser):
