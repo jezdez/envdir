@@ -1,11 +1,13 @@
-envdir
-======
+envdir (Python port)
+====================
 
 .. image:: https://api.travis-ci.org/jezdez/envdir.png
    :alt: Build Status
    :target: https://travis-ci.org/jezdez/envdir
 
-This is a Python port of daemontools_' envdir_.
+This is a Python port of daemontools_' tool `envdir <http://cr.yp.to/daemontools/envdir.html>`_.
+
+.. _daemontools: http://cr.yp.to/daemontools.html
 
 What?
 -----
@@ -108,6 +110,12 @@ Quoting the envdir documentation:
     memory for environment variables, or if it cannot run child. Otherwise
     its exit code is the same as that of child.
 
+.. note::
+
+    This Python port behaves different for multi line environment variables.
+    It will not only read the first line of the file but the whole file. Take
+    care with big files!
+
 Alternatively you can also use the ``python -m envdir`` form to call envdir.
 
 Python
@@ -132,25 +140,3 @@ Feedback
 
 Feel free to open tickets at https://github.com/jezdez/envdir/issues.
 Say thanks at https://www.gittip.com/jezdez/.
-
-.. _daemontools: http://cr.yp.to/daemontools.html
-.. _envdir: http://cr.yp.to/daemontools/envdir.html
-
-Changelog
----------
-
-0.2.1 (07/11/2013)
-^^^^^^^^^^^^^^^^^^
-
-* Fixed ``python -m envdir``
-* Extended README to better describe the purpose
-
-0.2 (07/10/2013)
-^^^^^^^^^^^^^^^^
-
-* Added ability to use envdir from Python.
-
-0.1 (07/10/2013)
-^^^^^^^^^^^^^^^^
-
-* Initial release.
