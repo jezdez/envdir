@@ -40,7 +40,7 @@ class Envdir(object):
         for env_path in env_paths:
             with open(env_path, 'r') as env_file:
                 root, name = os.path.split(env_path)
-                value = env_file.readline().strip()
+                value = env_file.read().strip()
                 yield name, value
 
     def read(self, path=None):

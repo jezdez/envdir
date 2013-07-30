@@ -40,8 +40,9 @@ Multiline envdir file
   $ echo "multi    
   > line
   > " > testenvdir/MULTI_LINE
-  $ envdir testenvdir printenv | grep MULTI_LINE
-  MULTI_LINE=multi
+  $ envdir testenvdir python -c "import os; print os.environ['MULTI_LINE']"
+  multi.* (re)
+  line
 
 Incorrect number of arguments
 
