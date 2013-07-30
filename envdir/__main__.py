@@ -81,9 +81,11 @@ class Envdir(object):
                                    shell=False,
                                    bufsize=0,
                                    close_fds=True)
-
-        if process.wait() != 0:
-            self.parser.exit(process.returncode, '')
+        try:
+            if process.wait() != 0:
+                self.parser.exit(process.returncode, '')
+        except KeyboardInterrupt:
+            self.parser.exit()
 
 envdir = Envdir()
 
