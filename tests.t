@@ -40,7 +40,7 @@ Multiline envdir file
   $ echo "multi    
   > line
   > " > testenvdir/MULTI_LINE
-  $ envdir testenvdir python -c "import os; print os.environ['MULTI_LINE']"
+  $ envdir testenvdir python -c "import os; print(os.environ['MULTI_LINE'])"
   multi.* (re)
   line
 
