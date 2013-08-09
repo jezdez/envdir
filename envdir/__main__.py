@@ -6,6 +6,9 @@ import sys
 
 __version__ = '0.3'
 
+# must have shell = True on Windows
+shellout = sys.platform == 'win32'
+
 
 class EnvOptionParser(optparse.OptionParser):
 
@@ -19,13 +22,12 @@ class EnvOptionParser(optparse.OptionParser):
         self.exit(no, "%s: error: %s\n" % (self.get_prog_name(), msg))
 
 
-class Envdir(object):
-    usage = "usage: %prog [--help] [--version] dir child"
+class Runner(object):
+    envdir_usage = "usage: %prog [--help] [--version] dir child"
+    envshell_usage = "usage: %prog [--help] [--version] dir"
 
     def __init__(self):
-        self.parser = EnvOptionParser(self.usage,
-                                      version=__version__,
-                                      prog='envdir')
+        self.parser = EnvOptionParser(version=__version__)
         self.parser.disable_interspersed_args()
 
     @staticmethod
@@ -43,25 +45,56 @@ class Envdir(object):
                 value = env_file.read().strip()
                 yield name, value
 
+    def path(self, path):
+        real_path = os.path.realpath(os.path.expanduser(path))
+        if not os.path.exists(real_path):
+            # use 111 error code to adher to envdir's standard
+            self.parser.error("envdir %r does not exist" % path, no=111)
+        return real_path        
+
     def read(self, path=None):
         if path is None:
             frame = sys._getframe()
             callerdir = os.path.dirname(frame.f_back.f_code.co_filename)
             path = os.path.join(callerdir, 'envdir')
 
-        real_path = os.path.realpath(os.path.expanduser(path))
-        if not os.path.exists(real_path):
-            # use 111 error code to adher to envdir's standard
-            self.parser.error("envdir %r does not exist" % path, no=111)
-
-        for name, value in self.environ(real_path):
+        for name, value in self.environ(self.path(path)):
             if value:
                 os.environ.setdefault(name, value)
             elif name in os.environ:
                 del os.environ[name]
 
-    def main(self, args):
-        options, args = self.parser.parse_args(args)
+    def shell(self, args):
+        self.parser.set_usage(self.envshell_usage)
+        self.parser.prog = 'envshell'
+
+        if len(args) == 0:
+            self.parser.error("incorrect number of arguments")
+            self.parser.print_usage()
+
+        sys.stdout.write("Launching envshell for %s. "
+                         "Type 'exit' or 'Ctrl+D' to return.\n" %
+                         self.path(args[0]))
+        sys.stdout.flush()
+        self.read(args[0])
+
+        try:
+            subprocess.check_call([os.environ['SHELL']],
+                                  universal_newlines=True,
+                                  shell=shellout,
+                                  bufsize=0,
+                                  close_fds=True)
+        except OSError as err:
+            if err.errno == 2:
+                self.parser.error(err.errno,
+                                  "Unable to find shell %s" %
+                                  os.environ['SHELL'])
+            else:
+                self.parser.exit(err.errno, '')
+
+    def call(self, args):
+        self.parser.set_usage(self.envdir_usage)
+        self.parser.prog = 'envdir'
 
         if len(args) < 2:
             self.parser.error("incorrect number of arguments")
@@ -76,22 +109,39 @@ class Envdir(object):
         if child_args[0] == '--':
             child_args = child_args[1:]
 
-        process = subprocess.Popen(child_args,
-                                   universal_newlines=True,
-                                   shell=False,
-                                   bufsize=0,
-                                   close_fds=True)
         try:
-            if process.wait() != 0:
-                self.parser.exit(process.returncode, '')
+            subprocess.check_call(child_args,
+                                  universal_newlines=True,
+                                  shell=shellout,
+                                  bufsize=0,
+                                  close_fds=True)
+        except OSError as err:
+            if err.errno == 2:
+                self.parser.error(err.errno,
+                                  "Unable to find command %s" %
+                                  child_args[0])
+            else:
+                self.parser.exit(err.errno, '')
+        except subprocess.CalledProcessError as err:
+            self.parser.exit(err.returncode, '')
         except KeyboardInterrupt:
             self.parser.exit()
 
-envdir = Envdir()
+
+    def main(self, name, args):
+        options, args = self.parser.parse_args(args)
+        if name.endswith('envdir') or name.endswith('__main__.py'):
+            self.call(args)
+        elif name.endswith('envshell'):
+            self.shell(args)
+        else:
+            self.parser.print_usage(sys.stderr)
+
+envdir = Runner()
 
 
 def main():
-    envdir.main(sys.argv[1:])
+    envdir.main(sys.argv[0], sys.argv[1:])
 
 if __name__ == '__main__':
     main()

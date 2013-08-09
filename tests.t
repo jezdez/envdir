@@ -73,3 +73,12 @@ Name cannot contain =
   $ echo "test" > "equalsign/EQUAL_SIGN="
   $ envdir equalsign printenv | grep EQUAL_SIGN
   [1]
+
+Shell
+
+  $ mkdir envshell
+  $ echo "test" > "envshell/TEST_VAR4"
+  $ envshell envshell
+  Launching subshell with envdir. Type 'exit' or 'Ctrl+D' to return.
+  $ printenv | grep TEST_VAR4
+  TEST_VAR4=test
