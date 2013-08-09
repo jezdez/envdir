@@ -28,8 +28,8 @@ New system etc).
 
 Let's have a look at a typical envdir::
 
-    $ tree mysite_env/
-    mysite_env/
+    $ tree envs/prod/
+    envs/prod/
     ├── DJANGO_SETTINGS_MODULE
     ├── MYSITE_DEBUG
     ├── MYSITE_DEPLOY_DIR
@@ -37,7 +37,7 @@ Let's have a look at a typical envdir::
     └── PYTHONSTARTUP
 
     0 directories, 3 files
-    $ cat mysite_env/DJANGO_SETTINGS_MODULE
+    $ cat envs/prod/DJANGO_SETTINGS_MODULE
     mysite.settings
     $
 
@@ -45,7 +45,7 @@ As you can see each file has a capitalized name and contains the value of the
 environment variable to set when running your program. To use it, simply
 prefix the call to your program with envdir::
 
-    $ envdir mysite_env python manage.py runserver
+    $ envdir envs/prod/ python manage.py runserver
 
 That's it, nothing more and nothing less. The way you structure your envdir
 is left to you but can easily match your configuration requirements and
@@ -133,7 +133,24 @@ It's also possible to explicitly pass the path to the envdir::
     import os
     import envdir
 
-    envdir.read('/etc/mysite/envdir')
+    envdir.read('/home/jezdez/mysite/envs/prod')
+
+Shell
+^^^^^
+
+envdir also includes an optional CLI tool called ``envshell`` which launches
+a subshell using the given directory. It basically allows you to make a set
+of environment variable stick to your current shell session if you happen to
+use envdir a lot outside of simple script use.
+
+For example::
+
+    $ envshell ~/mysite/envs/prod/
+    Launching envshell for /home/jezdez/mysite/envs/prod. Type 'exit' or 'Ctrl+D' to return.
+    $ python manage.py runserver
+    ..
+
+To leave the subshell, simply use the ``exit`` command or press ``Ctrl+D``.
 
 Feedback
 --------

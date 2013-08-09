@@ -1,6 +1,17 @@
 Changelog
 ---------
 
+0.4 (08/09/2013)
+^^^^^^^^^^^^^^^^
+
+* Added ``envshell`` command which launches a subshell using the environment
+  as defined in the given envdir. Example::
+
+    $ envshell ~/mysite/envs/prod/
+    Launching envshell for /home/jezdez/mysite/envs/prod. Type 'exit' or 'Ctrl+D' to return.
+    $ python manage.py runserver
+    ..
+
 0.3 (07/30/2013)
 ^^^^^^^^^^^^^^^^
 

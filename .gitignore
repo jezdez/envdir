@@ -1,3 +1,5 @@
 __pycache__
 *.egg-info
 *.err
+.tox
+*.egg
