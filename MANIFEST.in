@@ -1,2 +1,1 @@
-include README.rst CHANGES.rst
-include tests.t
+include README.rst CHANGES.rst tests.t tox.ini
