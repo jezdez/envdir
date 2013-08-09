@@ -79,6 +79,6 @@ Shell
   $ mkdir envshell
   $ echo "test" > "envshell/TEST_VAR4"
   $ envshell envshell
-  Launching subshell with *. Type 'exit' or 'Ctrl+D' to return. (glob)
+  Launching envshell for *. Type 'exit' or 'Ctrl+D' to return. (glob)
   $ printenv | grep TEST_VAR4
   TEST_VAR4=test
