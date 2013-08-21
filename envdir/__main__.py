@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 
-__version__ = '0.4'
+__version__ = '0.4.1'
 
 # must have shell = True on Windows
 shellout = sys.platform == 'win32'
@@ -50,7 +50,7 @@ class Runner(object):
         if not os.path.exists(real_path):
             # use 111 error code to adher to envdir's standard
             self.parser.error("envdir %r does not exist" % path, no=111)
-        return real_path        
+        return real_path
 
     def read(self, path=None):
         if path is None:
@@ -60,7 +60,7 @@ class Runner(object):
 
         for name, value in self.environ(self.path(path)):
             if value:
-                os.environ.setdefault(name, value)
+                os.environ[name] = value
             elif name in os.environ:
                 del os.environ[name]
 
@@ -126,7 +126,6 @@ class Runner(object):
             self.parser.exit(err.returncode, '')
         except KeyboardInterrupt:
             self.parser.exit()
-
 
     def main(self, name, args):
         options, args = self.parser.parse_args(args)

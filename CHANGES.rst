@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+0.4.1 (08/21/2013)
+^^^^^^^^^^^^^^^^^^
+
+* Fixed ``envdir.read()`` to actually work with already existing environment
+  variables. Extended docs to test Python use.
+
 0.4 (08/09/2013)
 ^^^^^^^^^^^^^^^^
 

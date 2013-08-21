@@ -80,3 +80,29 @@ Shell
   $ echo "test" > "envshell/TEST_VAR4"
   $ envshell envshell
   Launching envshell for *. Type 'exit' or 'Ctrl+D' to return. (glob)
+
+Python usage with a specific directory
+
+  $ mkdir pythonuse
+  $ echo "test" > "pythonuse/TEST_VAR5"
+  $ python -c "import envdir, subprocess; envdir.read('pythonuse'); subprocess.call('printenv')" | grep TEST_VAR5
+  TEST_VAR5=test
+
+Python usage with magic envdir
+
+  $ mkdir envdir
+  $ echo "test" > "envdir/TEST_VAR6"
+  $ echo "import envdir, os, sys
+  > envdir.read()
+  > if 'TEST_VAR6' in os.environ:
+  >     sys.exit(42)
+  > " > test.py
+  $ python test.py
+  [42]
+
+Python usage with preexisting env var
+
+  $ mkdir pythonuse2
+  $ echo "override" > "pythonuse2/TEST_VAR7"
+  $ TEST_VAR7=test python -c "import envdir, subprocess; envdir.read('pythonuse2'); subprocess.call('printenv')" | grep TEST_VAR7
+  TEST_VAR7=override
