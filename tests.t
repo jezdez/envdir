@@ -44,6 +44,13 @@ Multiline envdir file
   multi.* (re)
   line
 
+NULLs are translated into newline
+
+  $ printf "null\0character" > testenvdir/TEST_NULL
+  $ envdir testenvdir printenv TEST_NULL
+  null
+  character
+
 Incorrect number of arguments
 
   $ mkdir incorrect
