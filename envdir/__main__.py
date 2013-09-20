@@ -42,7 +42,7 @@ class Runner(object):
         for env_path in env_paths:
             with open(env_path, 'r') as env_file:
                 root, name = os.path.split(env_path)
-                value = env_file.read().strip()
+                value = env_file.read().strip().replace('\x00', '\n')
                 yield name, value
 
     def path(self, path):
