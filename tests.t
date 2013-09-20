@@ -61,6 +61,15 @@ The envdir does not exist
   envdir: error: envdir 'non-existant' does not exist
   [111]
 
+The envdir must be a directory
+
+  $ touch not-a-directory
+  $ envdir not-a-directory ls
+  Usage: envdir [--help] [--version] dir child
+  
+  envdir: error: envdir 'not-a-directory' not a directory
+  [111]
+
 Error code proxy
 
   $ mkdir errorcode
