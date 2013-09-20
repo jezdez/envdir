@@ -21,7 +21,7 @@ code. A common pattern to solve this problem is to use environment variables
 to separate configuration from code.
 
 envdir allows you to set a series of environment variables at once to simplify
-maintaing complicated environments, for example in which you have multiple sets
+maintaining complicated environments, for example in which you have multiple sets
 of those configuration variables depending on the infrastructure you run your
 program on (e.g. Windows vs. Linux, Staging vs. Production, Old system vs.
 New system etc).
