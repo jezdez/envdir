@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 
-__version__ = '0.4.1'
+from .__version__ import __version__
 
 # must have shell = True on Windows
 shellout = sys.platform == 'win32'

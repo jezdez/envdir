@@ -34,7 +34,7 @@ def find_version(*file_paths):
 
 
 setup(name="envdir",
-      version=find_version('envdir', '__main__.py'),
+      version=find_version('envdir', '__version__.py'),
       classifiers=[
           'Development Status :: 4 - Beta',
           'Intended Audience :: Developers',
