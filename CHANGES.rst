@@ -1,6 +1,15 @@
 Changelog
 ---------
 
+0.5 (09/22/2013)
+^^^^^^^^^^^^^^^^
+
+* Added check if the the provided path is a directory and throw an error if
+  not. This adds compatibility to the daemontools' envdir.
+
+* Make sure to convert Nulls (``\0``) to newlines as done so in daemontools'
+  envdir.
+
 0.4.1 (08/21/2013)
 ^^^^^^^^^^^^^^^^^^
 
