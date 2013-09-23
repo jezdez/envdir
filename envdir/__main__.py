@@ -55,11 +55,15 @@ class Runner(object):
             self.parser.error("envdir %r not a directory" % path, no=111)
         return real_path
 
+    def _default_envdir_path(self, frame):
+        # frame here (inside *this* method) is not the same as in the
+        # place where the method is invoked
+        callerdir = os.path.dirname(frame.f_back.f_code.co_filename)
+        return os.path.join(callerdir, 'envdir')
+
     def read(self, path=None):
         if path is None:
-            frame = sys._getframe()
-            callerdir = os.path.dirname(frame.f_back.f_code.co_filename)
-            path = os.path.join(callerdir, 'envdir')
+            path = self._default_envdir_path(sys._getframe())
 
         for name, value in self.environ(self.path(path)):
             if value:
