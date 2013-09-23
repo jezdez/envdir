@@ -122,3 +122,28 @@ Python usage with preexisting env var
   $ echo "override" > "pythonuse2/TEST_VAR7"
   $ TEST_VAR7=test python -c "import envdir, subprocess; envdir.read('pythonuse2'); subprocess.call('printenv')" | grep TEST_VAR7
   TEST_VAR7=override
+
+Python usage writing envdir
+
+  $ python -c "import envdir; envdir.write('pythonuse3', TEST_VAR_8='hello')"
+  $ ls pythonuse3
+  TEST_VAR_8
+
+  $ cat ./pythonuse3/TEST_VAR_8
+  hello
+
+  $ python -c "import envdir, subprocess; envdir.read('pythonuse3'); subprocess.call('printenv')" | grep TEST_VAR_8
+  TEST_VAR_8=hello
+
+Python usage trying to write to existing envdir
+
+  $ python -c "import envdir; envdir.write('pythonuse4/envdir', TEST_VAR_9='hello')"
+  $ ls pythonuse4/envdir
+  TEST_VAR_9
+
+  $ python -c "import envdir; envdir.write('pythonuse4/envdir', TEST_VAR_10='hello')" 2> error.log
+  [1]
+
+  $ tail -n 1 error.log
+  OSError: [Errno 17] File exists: 'pythonuse4/envdir'
+

@@ -67,6 +67,14 @@ class Runner(object):
             elif name in os.environ:
                 del os.environ[name]
 
+    def write(self, path, **kwargs):
+        # trying to write to existing directory will cause OSError
+        os.makedirs(path)
+        for name, value in kwargs.items():
+            env_file_path = os.path.join(path, name)
+            with open(env_file_path, 'w') as env_file:
+                env_file.write('%s\n' % value)  # append new line
+
     def shell(self, args):
         self.parser.set_usage(self.envshell_usage)
         self.parser.prog = 'envshell'
