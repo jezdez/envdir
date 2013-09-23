@@ -74,7 +74,7 @@ class Runner(object):
         for name, value in kwargs.items():
             env_file_path = os.path.join(path, name)
             with open(env_file_path, 'w') as env_file:
-                env_file.write('%s\n' % value)  # append new line
+                env_file.write('%s' % value)
 
     def shell(self, args):
         self.parser.set_usage(self.envshell_usage)

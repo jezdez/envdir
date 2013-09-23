@@ -130,7 +130,7 @@ Python usage writing envdir
   TEST_VAR_8
 
   $ cat ./pythonuse3/TEST_VAR_8
-  hello
+  hello (no-eol)
 
   $ python -c "import envdir, subprocess; envdir.read('pythonuse3'); subprocess.call('printenv')" | grep TEST_VAR_8
   TEST_VAR_8=hello
