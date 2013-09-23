@@ -68,7 +68,8 @@ class Runner(object):
                 del os.environ[name]
 
     def write(self, path, **kwargs):
-        # trying to write to existing directory will cause OSError
+        # trying to write to existing directory will cause OSError (or
+        # FileExistsError on python 3)
         os.makedirs(path)
         for name, value in kwargs.items():
             env_file_path = os.path.join(path, name)

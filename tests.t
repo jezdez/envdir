@@ -141,9 +141,12 @@ Python usage trying to write to existing envdir
   $ ls pythonuse4/envdir
   TEST_VAR_9
 
-  $ python -c "import envdir; envdir.write('pythonuse4/envdir', TEST_VAR_10='hello')" 2> error.log
+  $ python -c "import envdir; envdir.write('pythonuse4/envdir', TEST_VAR_10='hello')"
+  Traceback * (glob)
+    File "<string>", line (\d+), in <module> (re)
+    File "(.+)envdir/__main__.py", line (\d+), in write (re)
+      os.makedirs(path)
+    File "(.+)os.py", line (\d+), in makedirs (re)
+      mkdir(name, mode)
+  *: [Errno 17] File exists: 'pythonuse4/envdir' (glob)
   [1]
-
-  $ tail -n 1 error.log
-  OSError: [Errno 17] File exists: 'pythonuse4/envdir'
-

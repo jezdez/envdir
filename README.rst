@@ -149,7 +149,8 @@ you do it::
 
 .. note::
 
-   This may raise OSError if the given directory already exists
+   This may raise OSError (or FileExistsError on Python 3) if the given
+   directory already exists.
 
 
 Shell
