@@ -135,6 +135,19 @@ Python usage writing envdir
   $ python -c "import envdir, subprocess; envdir.read('pythonuse3'); subprocess.call('printenv')" | grep TEST_VAR_8
   TEST_VAR_8=hello
 
+Python usage writing magic envdir
+
+  $ rm -rf envdir  # make sure *magic* dir does not exists
+  $ python -c "import envdir; envdir.write(TEST_VAR_8='hello-2')"
+  $ ls envdir
+  TEST_VAR_8
+
+  $ cat ./envdir/TEST_VAR_8
+  hello-2 (no-eol)
+
+  $ python -c "import envdir, subprocess; envdir.read(); subprocess.call('printenv')" | grep TEST_VAR_8
+  TEST_VAR_8=hello-2
+
 Python usage trying to write to existing envdir
 
   $ python -c "import envdir; envdir.write('pythonuse4/envdir', TEST_VAR_9='hello')"

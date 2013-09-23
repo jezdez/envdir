@@ -71,7 +71,10 @@ class Runner(object):
             elif name in os.environ:
                 del os.environ[name]
 
-    def write(self, path, **kwargs):
+    def write(self, path=None, **kwargs):
+        if path is None:
+            path = self._default_envdir_path(sys._getframe())
+
         # trying to write to existing directory will cause OSError (or
         # FileExistsError on python 3)
         os.makedirs(path)
