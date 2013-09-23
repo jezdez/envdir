@@ -135,6 +135,23 @@ It's also possible to explicitly pass the path to the envdir::
 
     envdir.read('/home/jezdez/mysite/envs/prod')
 
+
+If on the other hand you'd like to create envdir in the given directory
+from within python (for instance as a part of deployment process) here's how
+you do it::
+
+    import envdir
+
+    envdir.write('/home/jezdez/mysite/envs/prod',
+                 ENVIRONMENT='production',
+                 DJANGO_SETTINGS_MODULE='mysite.production')
+
+
+.. note::
+
+   This may raise OSError if the given directory already exists
+
+
 Shell
 ^^^^^
 
