@@ -142,9 +142,17 @@ you do it::
 
     import envdir
 
-    envdir.write('/home/jezdez/mysite/envs/prod',
-                 ENVIRONMENT='production',
-                 DJANGO_SETTINGS_MODULE='mysite.production')
+    # This will create ``envdir`` directory next to the script file
+    envdir.write({
+        'ENVIRONMENT': 'production',
+        'DJANGO_SETTINGS_MODULE': 'mysite.production',
+    })
+
+    # This will create the directory in the given directory path
+    envdir.write('/home/jezdez/mysite/envs/prod', {
+        'ENVIRONMENT': 'production',
+        'DJANGO_SETTINGS_MODULE': 'mysite.production',
+    })
 
 
 .. note::

@@ -125,7 +125,7 @@ Python usage with preexisting env var
 
 Python usage writing envdir
 
-  $ python -c "import envdir; envdir.write('pythonuse3', TEST_VAR_8='hello')"
+  $ python -c "import envdir; envdir.write('pythonuse3', {'TEST_VAR_8': 'hello'})"
   $ ls pythonuse3
   TEST_VAR_8
 
@@ -138,7 +138,7 @@ Python usage writing envdir
 Python usage writing magic envdir
 
   $ rm -rf envdir  # make sure *magic* dir does not exists
-  $ python -c "import envdir; envdir.write(TEST_VAR_8='hello-2')"
+  $ python -c "import envdir; envdir.write({'TEST_VAR_8': 'hello-2'})"
   $ ls envdir
   TEST_VAR_8
 
@@ -150,11 +150,11 @@ Python usage writing magic envdir
 
 Python usage trying to write to existing envdir
 
-  $ python -c "import envdir; envdir.write('pythonuse4/envdir', TEST_VAR_9='hello')"
+  $ python -c "import envdir; envdir.write('pythonuse4/envdir', {'TEST_VAR_9': 'hello'})"
   $ ls pythonuse4/envdir
   TEST_VAR_9
 
-  $ python -c "import envdir; envdir.write('pythonuse4/envdir', TEST_VAR_10='hello')"
+  $ python -c "import envdir; envdir.write('pythonuse4/envdir', {'TEST_VAR_10': 'hello'})"
   Traceback * (glob)
     File "<string>", line (\d+), in <module> (re)
     File "(.+)envdir/__main__.py", line (\d+), in write (re)
