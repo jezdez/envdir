@@ -113,11 +113,12 @@ class Runner(object):
             child_args = child_args[1:]
 
         try:
-            subprocess.check_call(child_args,
-                                  universal_newlines=True,
-                                  shell=shellout,
-                                  bufsize=0,
-                                  close_fds=True)
+            process = subprocess.Popen(child_args,
+                                       universal_newlines=True,
+                                       shell=shellout,
+                                       bufsize=0,
+                                       close_fds=True)
+            process.wait()
         except OSError as err:
             if err.errno == 2:
                 self.parser.error(err.errno,
@@ -125,10 +126,16 @@ class Runner(object):
                                   child_args[0])
             else:
                 self.parser.exit(err.errno, '')
-        except subprocess.CalledProcessError as err:
-            self.parser.exit(err.returncode, '')
         except KeyboardInterrupt:
+            # first send mellow signal
+            process.terminate()
+            process.poll()
+            if process.returncode is None:
+                # still running, kill it
+                process.kill()
             self.parser.exit()
+        else:
+            self.parser.exit(process.returncode, '')
 
     def main(self, name, args):
         options, args = self.parser.parse_args(args)

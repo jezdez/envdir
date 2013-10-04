@@ -122,3 +122,7 @@ Python usage with preexisting env var
   $ echo "override" > "pythonuse2/TEST_VAR7"
   $ TEST_VAR7=test python -c "import envdir, subprocess; envdir.read('pythonuse2'); subprocess.call('printenv')" | grep TEST_VAR7
   TEST_VAR7=override
+
+Make sure we can send a Ctrl-c and exit without traceback. 124 returncode is send by timeout command when timeout has been reached
+  $ timeout --signal=SIGTERM 1 envdir envdir python -c "while True:pass"
+  [124]
