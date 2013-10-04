@@ -55,17 +55,37 @@ class Runner(object):
             self.parser.error("envdir %r not a directory" % path, no=111)
         return real_path
 
+    def _default_envdir_path(self, frame):
+        # frame here (inside *this* method) is not the same as in the
+        # place where the method is invoked
+        callerdir = os.path.dirname(frame.f_back.f_code.co_filename)
+        return os.path.join(callerdir, 'envdir')
+
     def read(self, path=None):
         if path is None:
-            frame = sys._getframe()
-            callerdir = os.path.dirname(frame.f_back.f_code.co_filename)
-            path = os.path.join(callerdir, 'envdir')
+            path = self._default_envdir_path(sys._getframe())
 
         for name, value in self.environ(self.path(path)):
             if value:
                 os.environ[name] = value
             elif name in os.environ:
                 del os.environ[name]
+
+    def write(self, path_or_envvars, envvars=None):
+        if envvars is None:
+            path = self._default_envdir_path(sys._getframe())
+            envvars = path_or_envvars
+        else:
+            path = path_or_envvars
+            # envvars already defined
+
+        # trying to write to existing directory will cause OSError (or
+        # FileExistsError on python 3)
+        os.makedirs(path)
+        for name, value in envvars.items():
+            env_file_path = os.path.join(path, name)
+            with open(env_file_path, 'w') as env_file:
+                env_file.write('%s' % value)
 
     def shell(self, args):
         self.parser.set_usage(self.envshell_usage)
