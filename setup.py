@@ -1,40 +1,34 @@
+import ast
 import codecs
 import os
-import re
-import sys
 
 from setuptools import setup
-from setuptools.command.test import test as TestCommand
+
 
 here = os.path.abspath(os.path.dirname(__file__))
 
 
-class CramTest(TestCommand):
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
+class VersionFinder(ast.NodeVisitor):
+    def __init__(self):
+        self.version = None
 
-    def run_tests(self):
-        import cram
-        sys.exit(cram.main(['tests.t']))
+    def visit_Assign(self, node):
+        if node.targets[0].id == '__version__':
+            self.version = node.value.s
 
 
 def read(*parts):
     return codecs.open(os.path.join(here, *parts), 'r').read()
 
 
-def find_version(*file_paths):
-    version_file = read(*file_paths)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                              version_file, re.M)
-    if version_match:
-        return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")
+def find_version(*parts):
+    finder = VersionFinder()
+    finder.visit(ast.parse(read(*parts)))
+    return finder.version
 
 
 setup(name="envdir",
-      version=find_version('envdir', '__version__.py'),
+      version=find_version('envdir', 'version.py'),
       classifiers=[
           'Development Status :: 4 - Beta',
           'Intended Audience :: Developers',
@@ -52,11 +46,9 @@ setup(name="envdir",
       long_description=read('README.rst') + '\n\n' + read('CHANGES.rst'),
       author='Jannis Leidel',
       author_email='jannis@leidel.info',
-      url='http://github.com/jezdez/envdir',
+      url='https://github.com/jezdez/envdir',
       license='MIT',
       packages=['envdir'],
-      entry_points=dict(console_scripts=['envdir=envdir:main',
-                                         'envshell=envdir:main']),
-      zip_safe=False,
-      tests_require=['cram'],
-      cmdclass={'test': CramTest})
+      entry_points=dict(console_scripts=['envdir=envdir:run',
+                                         'envshell=envdir:shell']),
+      zip_safe=False)
