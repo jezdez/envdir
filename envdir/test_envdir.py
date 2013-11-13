@@ -1,189 +1,179 @@
 import os
 import subprocess
 import py
+import pytest
 
 import envdir
-from envdir.runner import Runner, Response
+from envdir.runner import Response
 from envdir.__main__ import go
 
-runner = Runner()
 
-api = py.test.mark.api
-run = py.test.mark.run
-shell = py.test.mark.shell
+@pytest.fixture(scope="module")
+def run():
+    from envdir.runner import Runner
+    runner = Runner()
+    return runner.run
 
 
-@run
-def test_usage():
+@pytest.fixture(scope="module")
+def shell():
+    from envdir.runner import Runner
+    runner = Runner()
+    return runner.shell
+
+
+@pytest.fixture
+def tmpenvdir(tmpdir):
+    return tmpdir.mkdir('testenvdir')
+
+
+def test_usage(run):
     "Testing the usage"
     with py.test.raises(Response) as response:
-        runner.run('envdir')
+        run('envdir')
     assert "incorrect number of arguments" in response.value.message
     assert response.value.status == 2
 
 
-@run
-def test_default(tmpdir):
+def test_default(run, tmpenvdir):
     "Default cases."
-    tmp = tmpdir.mkdir('testenvdir')
-    tmp.join('DEFAULT').write('test')
+    tmpenvdir.join('DEFAULT').write('test')
     with py.test.raises(Response) as response:
-        runner.run('envdir', str(tmp), 'ls')
+        run('envdir', str(tmpenvdir), 'ls')
     assert "DEFAULT" in os.environ
     assert response.value.status == 0
     assert response.value.message == ''
 
-    tmp.join('DEFAULT_DASHDASH').write('test')
+    tmpenvdir.join('DEFAULT_DASHDASH').write('test')
     with py.test.raises(Response) as response:
-        runner.run('envdir', str(tmp), '--', 'ls')
+        run('envdir', str(tmpenvdir), '--', 'ls')
     assert "DEFAULT_DASHDASH" in os.environ
 
     # Overriding an env var inline
     os.environ['DEFAULT_OVERRIDE'] = 'test2'
     with py.test.raises(Response) as response:
-        runner.run('envdir', str(tmp), 'ls')
+        run('envdir', str(tmpenvdir), 'ls')
     assert "DEFAULT" in os.environ
     assert "DEFAULT_OVERRIDE" in os.environ
     assert response.value.status == 0
     assert response.value.message == ''
 
 
-@run
-def test_reset(tmpdir):
+def test_reset(run, tmpenvdir):
     "Resetting an env var with an empty file"
-    tmp = tmpdir.mkdir('testenvdir')
-    tmp.join('RESET').write('')
+    tmpenvdir.join('RESET').write('')
     os.environ['RESET'] = 'test3'
     with py.test.raises(Response):
-        runner.run('envdir', str(tmp), 'ls')
+        run('envdir', str(tmpenvdir), 'ls')
     assert os.environ['DEFAULT'] == 'test'
     with py.test.raises(KeyError):
         assert os.environ['RESET'] == 'test3'
 
 
-@run
-def test_multiline(tmpdir):
+def test_multiline(run, tmpenvdir):
     "Multiline envdir file"
-    tmp = tmpdir.mkdir('testenvdir')
-    tmp.join('MULTI_LINE').write("""multi
+    tmpenvdir.join('MULTI_LINE').write("""multi
 line
 """)
     with py.test.raises(Response):
-        runner.run('envdir', str(tmp), 'ls')
+        run('envdir', str(tmpenvdir), 'ls')
     assert os.environ['MULTI_LINE'] == 'multi\nline'
 
 
-@run
-def test_translate_nulls(tmpdir):
+def test_translate_nulls(run, tmpenvdir):
     "NULLs are translated into newline"
-    tmp = tmpdir.mkdir('testenvdir')
-    tmp.join('NULL_CHARS').write("""null\x00character""")
+    tmpenvdir.join('NULL_CHARS').write("""null\x00character""")
     with py.test.raises(Response):
-        runner.run('envdir', str(tmp), 'ls')
+        run('envdir', str(tmpenvdir), 'ls')
     assert os.environ['NULL_CHARS'] == 'null\ncharacter'
 
 
-@run
-def test_incorrect_no_args(tmpdir):
+def test_incorrect_no_args(run, tmpenvdir):
     "Incorrect number of arguments"
     with py.test.raises(Response) as response:
-        runner.run('envdir', str(tmpdir))
+        run('envdir', str(tmpenvdir))
     assert 'incorrect number of arguments' in response.value.message
     assert 2 == response.value.status
 
 
-@run
-def test_doesnt_exist(tmpdir):
+def test_doesnt_exist(run, tmpdir):
     with py.test.raises(Response) as response:
-        runner.run('envdir', str(tmpdir.join('missing')), 'ls')
+        run('envdir', str(tmpdir.join('missing')), 'ls')
     assert 'does not exist' in response.value.message
     assert 111 == response.value.status
 
     with py.test.raises(Response) as response:
-        runner.run('envdir', str(tmpdir), 'doesnt-exist')
+        run('envdir', str(tmpdir), 'doesnt-exist')
     assert 'Unable to find command' in response.value.message
     assert 2 == response.value.status
 
 
-@run
-def test_must_be_directory(tmpdir):
+def test_must_be_directory(run, tmpdir):
     "The envdir must be a directory"
     tmpdir.join('not-a-directory').write('')
     with py.test.raises(Response) as response:
-        runner.run('envdir', str(tmpdir.join('not-a-directory')), 'ls')
+        run('envdir', str(tmpdir.join('not-a-directory')), 'ls')
     assert 'not a directory' in response.value.message
     assert 111 == response.value.status
 
 
-@run
-def test_error_code(tmpdir):
-    tmp = tmpdir.mkdir('errorcode')
+def test_error_code(run, tmpenvdir):
     with py.test.raises(Response) as response:
-        runner.run('envdir', str(tmp),
-                   'python', '-c', 'import sys; sys.exit(19)')
+        run('envdir', str(tmpenvdir),
+            'python', '-c', 'import sys; sys.exit(19)')
     assert response.value.status == 19
 
 
-@run
-def test_equal_sign(tmpdir):
-    tmp = tmpdir.mkdir('equalsign')
-    tmp.join('EQUAL_SIGN=').write('test')
+def test_equal_sign(run, tmpenvdir):
+    tmpenvdir.join('EQUAL_SIGN=').write('test')
     with py.test.raises(Response):
-        runner.run('envdir', str(tmp), 'printenv')
+        run('envdir', str(tmpenvdir), 'printenv')
     assert 'EQUAL_SIGN' not in os.environ
 
 
 timeout = py.path.local.sysfind('timeout') or py.path.local.sysfind('gtimeout')
 
 
-@run
-@py.test.mark.skipif(timeout is None, reason="(g)timeout command not found")
-def test_keyboard_interrupt(tmpdir):
-    tmp = tmpdir.mkdir('keyboard')
+@py.test.mark.skipif(timeout is None,
+                     reason="(g)timeout command not found")
+def test_keyboard_interrupt(run, tmpenvdir):
     with py.test.raises(SystemExit) as exit:
-        go(runner.run, (str(timeout), '--signal=SIGTERM', '--', '1', 'envdir',
-                        str(tmp), 'ls'))
+        go(run, (str(timeout), '--signal=SIGTERM', '--', '1', 'envdir',
+                 str(tmpenvdir), 'ls'))
     if py.std.sys.version_info[:2] == (2, 6):
         assert exit.value == 2
     else:
         assert exit.value.code == 2
 
 
-@shell
-def test_shell(tmpdir, capfd):
-    tmp = tmpdir.mkdir('envshell')
-    tmp.join('TEST_SHELL').write('test')
+def test_shell(shell, tmpenvdir, capfd):
+    tmpenvdir.join('TEST_SHELL').write('test')
     with py.test.raises(Response) as response:
-        runner.shell('envshell', str(tmp))
+        shell('envshell', str(tmpenvdir))
     out, err = capfd.readouterr()
     assert response.value.status == 0
     assert "Launching envshell for " in out
 
     with py.test.raises(Response) as response:
-        runner.shell('envshell')
+        shell('envshell')
     assert "incorrect number of arguments" in response.value.message
 
 
-@shell
-def test_shell_doesnt_exist(tmpdir):
-    tmp = tmpdir.mkdir('envshell')
-    tmp.join('NO_TEST_SHELL').write('test')
+def test_shell_doesnt_exist(shell, tmpenvdir):
+    tmpenvdir.join('NO_TEST_SHELL').write('test')
     os.environ['SHELL'] = '/does/not/exist'
     with py.test.raises(Response) as response:
-        runner.shell('envshell', str(tmp))
+        shell('envshell', str(tmpenvdir))
     assert "Unable to find shell" in response.value.message
 
 
-@api
-def test_read(tmpdir):
-    tmp = tmpdir.mkdir('pythonuse')
-    tmp.join('READ').write('test')
-    applied = envdir.read(str(tmp))
+def test_read(tmpenvdir):
+    tmpenvdir.join('READ').write('test')
+    applied = envdir.read(str(tmpenvdir))
     assert 'READ' in os.environ
     assert 'READ' in applied
 
 
-@api
 def test_read_magic_dir(capfd, tmpdir):
     "Python usage with magic envdir"
     tmp = tmpdir.mkdir('envdir')
@@ -219,27 +209,22 @@ if 'READ_MAGIC' in os.environ:
         assert response.value.code == 2
 
 
-@api
-def test_read_existing_var(tmpdir):
-    tmp = tmpdir.mkdir('pythonuse2')
-    tmp.join('READ_EXISTING').write('override')
+def test_read_existing_var(tmpenvdir):
+    tmpenvdir.join('READ_EXISTING').write('override')
     os.environ['READ_EXISTING'] = 'test'
-    envdir.read(str(tmp))
+    envdir.read(str(tmpenvdir))
     assert os.environ['READ_EXISTING'] == 'override'
 
 
-@api
-def test_write(tmpdir):
-    tmp = tmpdir.mkdir('pythonuse3')
-    env = envdir.open(str(tmp))
+def test_write(tmpenvdir):
+    env = envdir.open(str(tmpenvdir))
     env.write(WRITE='test')
-    assert tmp.ensure('WRITE')
-    assert tmp.join('WRITE').read() == 'test'
-    envdir.read(str(tmp))
+    assert tmpenvdir.ensure('WRITE')
+    assert tmpenvdir.join('WRITE').read() == 'test'
+    envdir.read(str(tmpenvdir))
     assert os.environ['WRITE'] == 'test'
 
 
-@api
 def test_write_magic(tmpdir):
     tmp = tmpdir.mkdir('envdir')
     magic_scripts = tmpdir.join('test_magic_write.py')
@@ -254,26 +239,22 @@ env.write(WRITE_MAGIC='test')
     assert os.environ['WRITE_MAGIC'] == 'test'
 
 
-@api
-def test_context_manager(tmpdir):
-    tmp = tmpdir.mkdir('envdir')
-    tmp.join('CONTEXT_MANAGER').write('test')
+def test_context_manager(tmpenvdir):
+    tmpenvdir.join('CONTEXT_MANAGER').write('test')
 
-    with envdir.open(str(tmp)) as env:
+    with envdir.open(str(tmpenvdir)) as env:
         assert 'CONTEXT_MANAGER' not in os.environ
         env.read()
         assert 'CONTEXT_MANAGER' in os.environ
     assert 'CONTEXT_MANAGER' not in os.environ
-    assert repr(env) == "<envdir.Env '%s'>" % tmp
+    assert repr(env) == "<envdir.Env '%s'>" % tmpenvdir
 
 
-@api
-def test_context_manager_reset(tmpdir):
-    tmp = tmpdir.mkdir('envdir')
-    tmp.join('CONTEXT_MANAGER_RESET').write('test')
+def test_context_manager_reset(tmpenvdir):
+    tmpenvdir.join('CONTEXT_MANAGER_RESET').write('test')
     # make the var exist in the enviroment
     os.environ['CONTEXT_MANAGER_RESET'] = 'moot'
-    with envdir.open(str(tmp)) as env:
+    with envdir.open(str(tmpenvdir)) as env:
         env.read()
         assert os.environ['CONTEXT_MANAGER_RESET'] == 'test'
         env.clear()
@@ -282,10 +263,8 @@ def test_context_manager_reset(tmpdir):
         assert 'CONTEXT_MANAGER_RESET' in os.environ
 
 
-@api
-def test_context_manager_write(tmpdir):
-    tmp = tmpdir.mkdir('envdir')
-    with envdir.open(str(tmp)) as env:
+def test_context_manager_write(tmpenvdir):
+    with envdir.open(str(tmpenvdir)) as env:
         env.read()
         env.write(CONTEXT_MANAGER_WRITE='test')
         assert 'CONTEXT_MANAGER_WRITE' not in os.environ
@@ -294,12 +273,10 @@ def test_context_manager_write(tmpdir):
     assert 'CONTEXT_MANAGER_WRITE' not in os.environ
 
 
-@api
-def test_context_manager_item(tmpdir):
-    tmp = tmpdir.mkdir('envdir')
-    tmp.join('CONTEXT_MANAGER_ITEM').write('test')
+def test_context_manager_item(tmpenvdir):
+    tmpenvdir.join('CONTEXT_MANAGER_ITEM').write('test')
 
-    with envdir.open(str(tmp)) as env:
+    with envdir.open(str(tmpenvdir)) as env:
         # loaded but not read yet
         assert 'CONTEXT_MANAGER_ITEM' not in os.environ
         # the variable is in the env, but not in the env
@@ -310,9 +287,9 @@ def test_context_manager_item(tmpdir):
 
         env['CONTEXT_MANAGER_ITEM_SET'] = 'test'
         assert 'CONTEXT_MANAGER_ITEM_SET' in os.environ
-        assert tmp.join('CONTEXT_MANAGER_ITEM_SET').check()
+        assert tmpenvdir.join('CONTEXT_MANAGER_ITEM_SET').check()
         del env['CONTEXT_MANAGER_ITEM_SET']
         assert 'CONTEXT_MANAGER_ITEM_SET' not in os.environ
-        assert not tmp.join('CONTEXT_MANAGER_ITEM_SET').check()
-    assert tmp.ensure('CONTEXT_MANAGER_ITEM_SET')
+        assert not tmpenvdir.join('CONTEXT_MANAGER_ITEM_SET').check()
+    assert tmpenvdir.ensure('CONTEXT_MANAGER_ITEM_SET')
     assert 'CONTEXT_MANAGER_ITEM_SET' not in os.environ
