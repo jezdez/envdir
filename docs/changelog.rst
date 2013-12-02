@@ -1,6 +1,17 @@
 Changelog
 ---------
 
+0.6 (12/02/2013)
+^^^^^^^^^^^^^^^^
+
+* Rewrote tests with pytest.
+
+* Vastly extended Python API.
+
+* Added Sphinx based docs: http://envdir.readthedocs.org/
+
+* Fixed killing child process when capturing keyboard interrupt.
+
 0.5 (09/22/2013)
 ^^^^^^^^^^^^^^^^
 

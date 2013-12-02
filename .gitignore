@@ -5,3 +5,4 @@ __pycache__
 build/
 htmlcov
 .coverage
+docs/_build

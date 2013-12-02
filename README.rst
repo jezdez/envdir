@@ -26,7 +26,9 @@ of those configuration variables depending on the infrastructure you run your
 program on (e.g. Windows vs. Linux, Staging vs. Production, Old system vs.
 New system etc).
 
-Let's have a look at a typical envdir::
+Let's have a look at a typical envdir:
+
+.. code-block:: console
 
     $ tree envs/prod/
     envs/prod/
@@ -43,7 +45,9 @@ Let's have a look at a typical envdir::
 
 As you can see each file has a capitalized name and contains the value of the
 environment variable to set when running your program. To use it, simply
-prefix the call to your program with envdir::
+prefix the call to your program with envdir:
+
+.. code-block:: console
 
     $ envdir envs/prod/ python manage.py runserver
 
@@ -64,122 +68,3 @@ Because envdir is small enough that it shouldn't be tied to a bigger
 software distribution like daemontools that requires a compiler.
 
 Also, this Python port can easily be used on Windows, not only UNIX systems.
-
-Installation
-------------
-
-::
-
-    pip install envdir
-
-or::
-
-    easy_install envdir
-
-Usage
------
-
-Command line
-^^^^^^^^^^^^
-
-Quoting the envdir documentation:
-
-    envdir runs another program with environment modified according to files
-    in a specified directory.
-
-    Interface::
-
-        envdir d child
-
-    ``d`` is a single argument. ``child`` consists of one or more arguments.
-
-    envdir sets various environment variables as specified by files in the
-    directory named ``d``. It then runs ``child``.
-
-    If ``d`` contains a file named ``s`` whose first line is ``t``, envdir
-    removes an environment variable named ``s`` if one exists, and then adds
-    an environment variable named ``s`` with value ``t``. The name ``s`` must
-    not contain ``=``. Spaces and tabs at the end of ``t`` are removed.
-    Nulls in ``t`` are changed to newlines in the environment variable.
-
-    If the file ``s`` is completely empty (0 bytes long), envdir removes an
-    environment variable named ``s`` if one exists, without adding a new
-    variable.
-
-    envdir exits ``111`` if it has trouble reading ``d``, if it runs out of
-    memory for environment variables, or if it cannot run child. Otherwise
-    its exit code is the same as that of child.
-
-.. note::
-
-    This Python port behaves different for multi line environment variables.
-    It will not only read the first line of the file but the whole file. Take
-    care with big files!
-
-Alternatively you can also use the ``python -m envdir`` form to call envdir.
-
-Python
-^^^^^^
-
-To use envdir in a Python file (e.g. Django's ``manage.py``) you can use::
-
-    import envdir
-    envdir.read()
-
-envdir will try to find an ``envdir`` directory next to the file you modified.
-
-It's also possible to explicitly pass the path to the envdir::
-
-    import os
-    import envdir
-
-    envdir.read('/home/jezdez/mysite/envs/prod')
-
-
-If on the other hand you'd like to create envdir in the given directory
-from within python (for instance as a part of deployment process) here's how
-you do it::
-
-    import envdir
-
-    # This will create ``envdir`` directory next to the script file
-    envdir.write({
-        'ENVIRONMENT': 'production',
-        'DJANGO_SETTINGS_MODULE': 'mysite.production',
-    })
-
-    # This will create the directory in the given directory path
-    envdir.write('/home/jezdez/mysite/envs/prod', {
-        'ENVIRONMENT': 'production',
-        'DJANGO_SETTINGS_MODULE': 'mysite.production',
-    })
-
-
-.. note::
-
-   This may raise OSError (or FileExistsError on Python 3) if the given
-   directory already exists.
-
-
-Shell
-^^^^^
-
-envdir also includes an optional CLI tool called ``envshell`` which launches
-a subshell using the given directory. It basically allows you to make a set
-of environment variable stick to your current shell session if you happen to
-use envdir a lot outside of simple script use.
-
-For example::
-
-    $ envshell ~/mysite/envs/prod/
-    Launching envshell for /home/jezdez/mysite/envs/prod. Type 'exit' or 'Ctrl+D' to return.
-    $ python manage.py runserver
-    ..
-
-To leave the subshell, simply use the ``exit`` command or press ``Ctrl+D``.
-
-Feedback
---------
-
-Feel free to open tickets at https://github.com/jezdez/envdir/issues.
-Say thanks at https://www.gittip.com/jezdez/.
