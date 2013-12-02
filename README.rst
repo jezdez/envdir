@@ -58,9 +58,14 @@ environment variables can be found on the 12factor_ site.
 
 .. note::
 
-  This Python port behaves different for multi line environment variables.
-  It will not only read the first line of the file but the whole file. Take
-  care with big files!
+   This Python port behaves different for multi line environment variables.
+   It will not only read the first line of the file but the whole file. Take
+   care with big files!
+
+.. tip::
+
+    Feel free to open tickets at https://github.com/jezdez/envdir/issues.
+    Say thanks at https://www.gittip.com/jezdez/.
 
 .. _12factor: http://12factor.net/config
 .. _daemontools: http://cr.yp.to/daemontools.html
