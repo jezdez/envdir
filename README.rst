@@ -5,12 +5,9 @@ envdir (Python port)
    :alt: Build Status
    :target: https://travis-ci.org/jezdez/envdir
 
-This is a Python port of daemontools_' tool `envdir <http://cr.yp.to/daemontools/envdir.html>`_.
-
-.. _daemontools: http://cr.yp.to/daemontools.html
-
-What?
------
+This is a Python port of daemontools_' tool envdir_. It works on Windows and
+other systems which can run Python. It's well tested and doesn't need a
+compiler to be installed.
 
 envdir runs another program with a modified environment according to files
 in a specified directory.
@@ -59,12 +56,12 @@ all.
 An interesting summary about why it's good to store configuration values in
 environment variables can be found on the 12factor_ site.
 
+.. note::
+
+  This Python port behaves different for multi line environment variables.
+  It will not only read the first line of the file but the whole file. Take
+  care with big files!
+
 .. _12factor: http://12factor.net/config
-
-Why?
-----
-
-Because envdir is small enough that it shouldn't be tied to a bigger
-software distribution like daemontools that requires a compiler.
-
-Also, this Python port can easily be used on Windows, not only UNIX systems.
+.. _daemontools: http://cr.yp.to/daemontools.html
+.. _envdir: http://cr.yp.to/daemontools/envdir.html
