@@ -1,6 +1,11 @@
 import glob
 import os
 
+try:
+    from UserDict import IterableUserDict as UserDict
+except ImportError:
+    from collections import UserDict
+
 
 def isenvvar(name):
     root, name = os.path.split(name)
@@ -9,19 +14,20 @@ def isenvvar(name):
             not '=' in name)
 
 
-class Env(object):
+class Env(UserDict):
     """
-    An object to represent an envdir environment with extensive
-    dict-like API, can be used as context manager.
+    An dict-like object to represent an envdir environment with extensive
+    API, can be used as context manager, too.
     """
-    def __init__(self, root):
-        self.root = root
-        self.applied = {}
+    def __init__(self, path):
+        self.path = path
+        self.data = {}
         self.originals = {}
         self.created = {}
+        self._load()
 
     def __repr__(self):
-        return "<envdir.Env '%s'>" % self.root
+        return "<envdir.Env '%s'>" % self.path
 
     def __enter__(self):
         return self
@@ -30,59 +36,64 @@ class Env(object):
         self.clear()
 
     def __getitem__(self, name):
-        return self.get(name)
+        return self._get(name)
 
     def __setitem__(self, name, value):
-        self.write(**{name: value})
-        self.set(name, value)
+        self._write(**{name: value})
+        self._set(name, value)
         self.created[name] = value
 
     def __delitem__(self, name):
-        os.remove(os.path.join(self.root, name))
-        self.delete(name)
+        os.remove(os.path.join(self.path, name))
+        self._delete(name)
 
     def __contains__(self, name):
-        return (name in self.applied or
-                os.path.exists(os.path.join(self.root, name)))
+        return (name in self.data or
+                os.path.exists(os.path.join(self.path, name)))
 
-    def clear(self):
-        for name in list(self.applied.keys()):
-            self.delete(name)
-            if name in self.created:
-                os.remove(os.path.join(self.root, name))
+    def _load(self):
+        for path in filter(isenvvar, glob.glob(os.path.join(self.path, '*'))):
+            root, name = os.path.split(path)
+            value = self._get(name)
+            self._set(name, value)
 
-    def open(self, name, mode='r'):
-        return open(os.path.join(self.root, name), mode)
+    def _open(self, name, mode='r'):
+        return open(os.path.join(self.path, name), mode)
 
-    def get(self, name):
-        with self.open(name) as var:
+    def _get(self, name, default=None):
+        path = os.path.join(self.path, name)
+        if not os.path.exists(path):
+            return default
+        with self._open(name) as var:
             return var.read().strip().replace('\x00', '\n')
 
-    def set(self, name, value):
+    def _set(self, name, value):
         if name in os.environ:
             self.originals[name] = os.environ[name]
-        self.applied[name] = value
+        self.data[name] = value
         if value:
             os.environ[name] = value
         elif name in os.environ:
             del os.environ[name]
 
-    def delete(self, name):
+    def _delete(self, name):
         if name in self.originals:
             os.environ[name] = self.originals[name]
         elif name in os.environ:
             del os.environ[name]
-        if name in self.applied:
-            del self.applied[name]
+        if name in self.data:
+            del self.data[name]
 
-    def read(self):
-        for path in filter(isenvvar, glob.glob(os.path.join(self.root, '*'))):
-            root, name = os.path.split(path)
-            value = self.get(name)
-            self.set(name, value)
-        return self.applied
-
-    def write(self, **values):
+    def _write(self, **values):
         for name, value in values.items():
-            with self.open(name, 'w') as env:
-                env.write('%s' % value)
+            with self._open(name, 'w') as env:
+                env.write(value)
+
+    def clear(self):
+        """
+        Clears the envdir by resetting the os.environ items to the
+        values it had before opening this envdir (or removing them
+        if they didn't exist). Doesn't delete the envdir files.
+        """
+        for name in list(self.data.keys()):
+            self._delete(name)

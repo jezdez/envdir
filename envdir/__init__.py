@@ -2,8 +2,12 @@ from .__main__ import runner, go
 from .env import Env  # noqa
 from .version import __version__  # noqa
 
-read = runner.read
 open = runner.open
+
+
+# for backward compatibility
+def read(path=None):
+    return open(path, stacklevel=2)
 
 
 def run(*args):

@@ -49,11 +49,6 @@ class Runner(object):
                 path = 'envdir'
         return Env(self.path(path))
 
-    # for backward compatibility
-    def read(self, path=None):
-        env = self.open(path, stacklevel=2)
-        return env.read()
-
     def shell(self, name, *args):
         self.parser.set_usage(self.envshell_usage)
         self.parser.prog = 'envshell'
@@ -67,7 +62,7 @@ class Runner(object):
                          "Type 'exit' or 'Ctrl+D' to return.\n" %
                          self.path(args[0]))
         sys.stdout.flush()
-        self.read(args[0])
+        self.open(args[0], 2)
 
         shell = os.environ['SHELL']
         try:
@@ -94,7 +89,7 @@ class Runner(object):
             raise Response("%s\nError: incorrect number of arguments\n" %
                            (self.parser.get_usage()), 2)
 
-        self.read(args[0])
+        self.open(args[0], 2)
 
         # the args to call later
         args = args[1:]

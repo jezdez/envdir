@@ -218,7 +218,7 @@ def test_read_existing_var(tmpenvdir):
 
 def test_write(tmpenvdir):
     env = envdir.open(str(tmpenvdir))
-    env.write(WRITE='test')
+    env['WRITE'] = 'test'
     assert tmpenvdir.ensure('WRITE')
     assert tmpenvdir.join('WRITE').read() == 'test'
     envdir.read(str(tmpenvdir))
@@ -231,7 +231,7 @@ def test_write_magic(tmpdir):
     magic_scripts.write("""
 import envdir, os, sys
 env = envdir.open()
-env.write(WRITE_MAGIC='test')
+env['WRITE_MAGIC'] = 'test'
 """)
     subprocess.call(['python', str(magic_scripts)])
     assert tmp.join('WRITE_MAGIC').read() == 'test'
@@ -243,11 +243,27 @@ def test_context_manager(tmpenvdir):
     tmpenvdir.join('CONTEXT_MANAGER').write('test')
 
     with envdir.open(str(tmpenvdir)) as env:
-        assert 'CONTEXT_MANAGER' not in os.environ
-        env.read()
         assert 'CONTEXT_MANAGER' in os.environ
     assert 'CONTEXT_MANAGER' not in os.environ
     assert repr(env) == "<envdir.Env '%s'>" % tmpenvdir
+
+
+def test_dict_like(tmpenvdir):
+    tmpenvdir.join('ITER').write('test')
+    env = envdir.open(str(tmpenvdir))
+    assert list(env) == ['ITER']
+    assert hasattr(env, '__iter__')
+
+    assert [k for k in env] == ['ITER']
+    assert list(env.values()) == ['test']
+    assert list(env.items()) == [('ITER', 'test')]
+    assert 'ITER' in os.environ
+    env.clear()
+    assert list(env.items()) == []
+    assert 'ITER' not in os.environ
+
+    with envdir.open(str(tmpenvdir)) as env:
+        assert list(env.items()) == [('ITER', 'test')]
 
 
 def test_context_manager_reset(tmpenvdir):
@@ -255,7 +271,6 @@ def test_context_manager_reset(tmpenvdir):
     # make the var exist in the enviroment
     os.environ['CONTEXT_MANAGER_RESET'] = 'moot'
     with envdir.open(str(tmpenvdir)) as env:
-        env.read()
         assert os.environ['CONTEXT_MANAGER_RESET'] == 'test'
         env.clear()
         # because we reset the original value
@@ -265,10 +280,8 @@ def test_context_manager_reset(tmpenvdir):
 
 def test_context_manager_write(tmpenvdir):
     with envdir.open(str(tmpenvdir)) as env:
-        env.read()
-        env.write(CONTEXT_MANAGER_WRITE='test')
         assert 'CONTEXT_MANAGER_WRITE' not in os.environ
-        env.read()
+        env['CONTEXT_MANAGER_WRITE'] = 'test'
         assert 'CONTEXT_MANAGER_WRITE' in os.environ
     assert 'CONTEXT_MANAGER_WRITE' not in os.environ
 
@@ -277,8 +290,7 @@ def test_context_manager_item(tmpenvdir):
     tmpenvdir.join('CONTEXT_MANAGER_ITEM').write('test')
 
     with envdir.open(str(tmpenvdir)) as env:
-        # loaded but not read yet
-        assert 'CONTEXT_MANAGER_ITEM' not in os.environ
+        assert 'CONTEXT_MANAGER_ITEM' in os.environ
         # the variable is in the env, but not in the env
         assert env['CONTEXT_MANAGER_ITEM'] == 'test'
         del env['CONTEXT_MANAGER_ITEM']
