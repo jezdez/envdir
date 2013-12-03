@@ -1,12 +1,17 @@
 Installation
 ============
 
-.. code-block:: console
+As Python package
+-----------------
+
+.. highlight:: console
+
+::
 
     $ pip install envdir
 
 or:
 
-.. code-block:: console
+::
 
     $ easy_install envdir
