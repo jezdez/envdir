@@ -36,7 +36,7 @@ Windows
     the `Python Launcher for Windows documentation`_ for more infos.
 
 Next step is downloading the actual standalone script. On Windows this entails
-using your web browser to download the following URL:
+using your web browser to download the following URL::
 
     https://github.com/jezdez/envdir/releases/download/0.6/envdir-0.6.pyz
 
@@ -54,7 +54,7 @@ Linux, Mac OS, others
 ^^^^^^^^^^^^^^^^^^^^^
 
 On Linux, Mac OS and other platforms with a shell like bash simply download
-the standalone file from PyPI::
+the standalone file from Github::
 
     $ curl -O https://github.com/jezdez/envdir/releases/download/0.6/envdir-0.6.pyz
 
