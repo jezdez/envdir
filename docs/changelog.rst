@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-0.6 (12/02/2013)
+0.6 (12/03/2013)
 ^^^^^^^^^^^^^^^^
 
 * Rewrote tests with pytest.
