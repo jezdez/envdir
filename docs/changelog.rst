@@ -12,6 +12,10 @@ Changelog
 
 * Fixed killing child process when capturing keyboard interrupt.
 
+* Added standalone script based on PEPs 441 and 397, compatible with
+  Python Launcher for Windows. See the installation instructions for more
+  info.
+
 0.5 (09/22/2013)
 ^^^^^^^^^^^^^^^^
 
