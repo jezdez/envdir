@@ -64,7 +64,7 @@ the standalone file from Github:
 
 .. parsed-literal::
 
-    $ curl -O \https://github.com/jezdez/envdir/releases/download/|release|/envdir-|release|.pyz
+    $ curl -LO \https://github.com/jezdez/envdir/releases/download/|release|/envdir-|release|.pyz
 
 and then run the file like you would do when running the script installed by
 the envdir package (see above):
