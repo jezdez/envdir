@@ -123,7 +123,7 @@ class Runner(object):
             self.terminate()
         raise Response(status=self.process.returncode)
 
-    def terminate(self):
+    def terminate(self, *args, **kwargs):
         # first send mellow signal
         self.quit(signal.SIGTERM)
         if self.process.poll() is None:
