@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+0.6.1 (12/23/2013)
+^^^^^^^^^^^^^^^^^^
+
+* Fixed handling SIGTERM signals to make sure all children of the forked
+  process are killed, too. Thanks to Horst Gutmann for the report and
+  help fixing it.
+
 0.6 (12/03/2013)
 ^^^^^^^^^^^^^^^^
 
