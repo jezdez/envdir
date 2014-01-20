@@ -110,7 +110,7 @@ class Runner(object):
             self.process = subprocess.Popen(args,
                                             universal_newlines=True,
                                             bufsize=0,
-                                            close_fds=not is_windows,
+                                            close_fds=False,
                                             **params)
             self.process.wait()
         except OSError as err:
