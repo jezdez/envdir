@@ -80,6 +80,28 @@ line
     assert os.environ['MULTI_LINE'] == 'multi\nline'
 
 
+def test_lowercase_var_names(run, tmpenvdir):
+    "Lowercase env var name"
+    tmpenvdir.join('lowercase-variable').write("test")
+    with py.test.raises(Response) as response:
+        run('envdir', str(tmpenvdir), 'ls')
+    assert 'lowercase-variable' in os.environ
+    assert os.environ['lowercase-variable'] == 'test'
+    assert response.value.status == 0
+    assert response.value.message == ''
+
+
+def test_var_names_prefixed_by_underscore(run, tmpenvdir):
+    "Underscore prefixed env var name"
+    tmpenvdir.join('_UNDERSCORE_VAR').write("test")
+    with py.test.raises(Response) as response:
+        run('envdir', str(tmpenvdir), 'ls')
+    assert '_UNDERSCORE_VAR' in os.environ
+    assert os.environ['_UNDERSCORE_VAR'] == 'test'
+    assert response.value.status == 0
+    assert response.value.message == ''
+
+
 def test_translate_nulls(run, tmpenvdir):
     "NULLs are translated into newline"
     tmpenvdir.join('NULL_CHARS').write("""null\x00character""")

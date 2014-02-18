@@ -9,9 +9,7 @@ except ImportError:
 
 def isenvvar(name):
     root, name = os.path.split(name)
-    return (name == name.upper() and
-            not name.startswith('_') and
-            not '=' in name)
+    return '=' not in name
 
 
 class Env(UserDict):
