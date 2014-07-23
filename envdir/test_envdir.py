@@ -215,7 +215,7 @@ def test_keyboard_interrupt(run, tmpenvdir, monkeypatch):
     monkeypatch.setattr(os, 'execvpe',
                         functools.partial(mocked_execvpe,
                                           monkeypatch,
-                                          with_timeout=.5))
+                                          with_timeout=.0000001))
     with py.test.raises(Response) as response:
         run('envdir', str(tmpenvdir), 'sleep', '1')
     # Minus sign is added by subprocess to distinguish signals from exit codes.
