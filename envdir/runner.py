@@ -35,7 +35,10 @@ class Runner(object):
     def open(self, path=None, stacklevel=1):
         if path is None:
             frame = sys._getframe()
-            get_parent = lambda frame: frame.f_back
+
+            def get_parent(frame):
+                return frame.f_back
+
             for _ in range(stacklevel):
                 frame = get_parent(frame)
             if frame is not None:
@@ -97,6 +100,6 @@ class Runner(object):
             os.execvpe(args[0], args, os.environ)
         except OSError as err:
             raise Response("Unable to run command %s: %s" %
-                           (args[0], err.errstr), status=err.errno)
+                           (args[0], err), status=err.errno)
 
         raise Response()

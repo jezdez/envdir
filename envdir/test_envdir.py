@@ -1,11 +1,14 @@
+import functools
 import os
+import signal
 import subprocess
+import threading
+
 import py
 import pytest
 
 import envdir
 from envdir.runner import Response
-from envdir.__main__ import go
 
 
 @pytest.fixture(scope="module")
@@ -26,6 +29,33 @@ def shell():
 def tmpenvdir(tmpdir):
     return tmpdir.mkdir('testenvdir')
 
+original_execvpe = os.execvpe
+
+
+def mocked_execvpe(monkeypatch, name, args, env, with_timeout=None,
+                   signal_type=signal.SIGINT):
+    monkeypatch.setattr('os.execvpe', original_execvpe)
+    try:
+        process = subprocess.Popen(args,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
+                                   env=os.environ.copy())
+        if with_timeout:
+
+            def killer(pid):
+                os.kill(pid, signal_type)
+
+            timer = threading.Timer(with_timeout,
+                                    functools.partial(killer, process.pid))
+            timer.start()
+
+        stdout, stderr = process.communicate()
+        if process.returncode != 0:
+            raise OSError(process.returncode, stderr)
+    finally:
+        monkeypatch.setattr('os.execvpe', functools.partial(mocked_execvpe,
+                                                            monkeypatch))
+
 
 def test_usage(run):
     "Testing the usage"
@@ -35,8 +65,10 @@ def test_usage(run):
     assert response.value.status == 2
 
 
-def test_default(run, tmpenvdir):
+def test_default(run, tmpenvdir, monkeypatch):
     "Default cases."
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
     tmpenvdir.join('DEFAULT').write('test')
     with py.test.raises(Response) as response:
         run('envdir', str(tmpenvdir), 'ls')
@@ -59,8 +91,10 @@ def test_default(run, tmpenvdir):
     assert response.value.message == ''
 
 
-def test_reset(run, tmpenvdir):
+def test_reset(run, tmpenvdir, monkeypatch):
     "Resetting an env var with an empty file"
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
     tmpenvdir.join('RESET').write('')
     os.environ['RESET'] = 'test3'
     with py.test.raises(Response):
@@ -70,8 +104,10 @@ def test_reset(run, tmpenvdir):
         assert os.environ['RESET'] == 'test3'
 
 
-def test_multiline(run, tmpenvdir):
+def test_multiline(run, tmpenvdir, monkeypatch):
     "Multiline envdir file"
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
     tmpenvdir.join('MULTI_LINE').write("""multi
 line
 """)
@@ -80,8 +116,10 @@ line
     assert os.environ['MULTI_LINE'] == 'multi\nline'
 
 
-def test_lowercase_var_names(run, tmpenvdir):
+def test_lowercase_var_names(run, tmpenvdir, monkeypatch):
     "Lowercase env var name"
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
     tmpenvdir.join('lowercase-variable').write("test")
     with py.test.raises(Response) as response:
         run('envdir', str(tmpenvdir), 'ls')
@@ -91,8 +129,10 @@ def test_lowercase_var_names(run, tmpenvdir):
     assert response.value.message == ''
 
 
-def test_var_names_prefixed_by_underscore(run, tmpenvdir):
+def test_var_names_prefixed_by_underscore(run, tmpenvdir, monkeypatch):
     "Underscore prefixed env var name"
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
     tmpenvdir.join('_UNDERSCORE_VAR').write("test")
     with py.test.raises(Response) as response:
         run('envdir', str(tmpenvdir), 'ls')
@@ -102,23 +142,29 @@ def test_var_names_prefixed_by_underscore(run, tmpenvdir):
     assert response.value.message == ''
 
 
-def test_translate_nulls(run, tmpenvdir):
+def test_translate_nulls(run, tmpenvdir, monkeypatch):
     "NULLs are translated into newline"
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
     tmpenvdir.join('NULL_CHARS').write("""null\x00character""")
     with py.test.raises(Response):
         run('envdir', str(tmpenvdir), 'ls')
     assert os.environ['NULL_CHARS'] == 'null\ncharacter'
 
 
-def test_incorrect_no_args(run, tmpenvdir):
+def test_incorrect_no_args(run, tmpenvdir, monkeypatch):
     "Incorrect number of arguments"
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
     with py.test.raises(Response) as response:
         run('envdir', str(tmpenvdir))
     assert 'incorrect number of arguments' in response.value.message
     assert 2 == response.value.status
 
 
-def test_doesnt_exist(run, tmpdir):
+def test_doesnt_exist(run, tmpdir, monkeypatch):
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
     with py.test.raises(Response) as response:
         run('envdir', str(tmpdir.join('missing')), 'ls')
     assert 'does not exist' in response.value.message
@@ -126,12 +172,17 @@ def test_doesnt_exist(run, tmpdir):
 
     with py.test.raises(Response) as response:
         run('envdir', str(tmpdir), 'doesnt-exist')
-    assert 'Unable to find command' in response.value.message
+    result = ('Unable to run command' in response.value.message or
+              'Unable to find command' in response.value.message)
+    assert result
+
     assert 2 == response.value.status
 
 
-def test_must_be_directory(run, tmpdir):
+def test_must_be_directory(run, tmpdir, monkeypatch):
     "The envdir must be a directory"
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
     tmpdir.join('not-a-directory').write('')
     with py.test.raises(Response) as response:
         run('envdir', str(tmpdir.join('not-a-directory')), 'ls')
@@ -139,14 +190,18 @@ def test_must_be_directory(run, tmpdir):
     assert 111 == response.value.status
 
 
-def test_error_code(run, tmpenvdir):
+def test_error_code(run, tmpenvdir, monkeypatch):
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
     with py.test.raises(Response) as response:
         run('envdir', str(tmpenvdir),
             'python', '-c', 'import sys; sys.exit(19)')
     assert response.value.status == 19
 
 
-def test_equal_sign(run, tmpenvdir):
+def test_equal_sign(run, tmpenvdir, monkeypatch):
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
     tmpenvdir.join('EQUAL_SIGN=').write('test')
     with py.test.raises(Response):
         run('envdir', str(tmpenvdir), 'printenv')
@@ -156,16 +211,18 @@ def test_equal_sign(run, tmpenvdir):
 timeout = py.path.local.sysfind('timeout') or py.path.local.sysfind('gtimeout')
 
 
-@py.test.mark.skipif(timeout is None,
-                     reason="(g)timeout command not found")
-def test_keyboard_interrupt(run, tmpenvdir):
-    with py.test.raises(SystemExit) as exit:
-        go(run, (str(timeout), '--signal=SIGTERM', '--', '1', 'envdir',
-                 str(tmpenvdir), 'ls'))
-    if py.std.sys.version_info[:2] == (2, 6):
-        assert exit.value == 2
-    else:
-        assert exit.value.code == 2
+def test_keyboard_interrupt(run, tmpenvdir, monkeypatch):
+    monkeypatch.setattr(os, 'execvpe',
+                        functools.partial(mocked_execvpe,
+                                          monkeypatch,
+                                          with_timeout=.5))
+    with py.test.raises(Response) as response:
+        run('envdir', str(tmpenvdir), 'sleep', '1')
+    # Minus sign is added by subprocess to distinguish signals from exit codes.
+    # Since we send a signal within the test to stop the process, it is the
+    # intended behaviour.
+    # signal.SIGINT is equivalent to KeyboardInterrupt on POSIX.
+    assert response.value.status == -signal.SIGINT
 
 
 def test_shell(shell, tmpenvdir, capfd):
