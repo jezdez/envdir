@@ -1,7 +1,7 @@
 Authors
 =======
 
-George Yoshida
-Horst Gutmann
-Jannis Leidel
-Kuba Janoszek
+- George Yoshida
+- Horst Gutmann
+- Jannis Leidel
+- Kuba Janoszek
