@@ -2,8 +2,12 @@ envdir (Python port)
 ====================
 
 .. image:: https://api.travis-ci.org/jezdez/envdir.png
-   :alt: Build Status
+   :alt: Linux Build Status
    :target: https://travis-ci.org/jezdez/envdir
+
+.. image:: https://ci.appveyor.com/api/projects/status/0fh77wei6cj5hei5
+   :alt: Windows Build Status
+   :target: https://ci.appveyor.com/project/jezdez/envdir
 
 This is a Python port of daemontools_' tool envdir_. It works on Windows and
 other systems which can run Python. It's well tested and doesn't need a
