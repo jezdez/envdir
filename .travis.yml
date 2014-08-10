@@ -6,7 +6,7 @@ env:
   - TOXENV=py33
   - TOXENV=pypy
   - TOXENV=flake827
-  - TOXENV=flake833
+  - TOXENV=flake834
 install:
   - pip install tox
 script:
