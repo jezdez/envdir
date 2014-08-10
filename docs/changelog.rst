@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-0.7 (08/09/2014)
+0.7 (08/10/2014)
 ^^^^^^^^^^^^^^^^
 
 * Use `exec` (`os.execvpe`) to replace the envdir process with the child
