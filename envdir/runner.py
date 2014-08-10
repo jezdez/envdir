@@ -64,7 +64,12 @@ class Runner(object):
         sys.stdout.flush()
         self.open(args[0], 2)
 
-        shell = os.environ['SHELL']
+        if 'SHELL' in os.environ:
+            shell = os.environ['SHELL']
+        elif 'COMSPEC' in os.environ:
+            shell = os.environ['COMSPEC']
+        else:
+            raise Response('Unable to detect current environment shell')
 
         try:
             subprocess.call([shell])
