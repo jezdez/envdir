@@ -1,5 +1,6 @@
 import functools
 import os
+import platform
 import signal
 import subprocess
 import threading
@@ -218,11 +219,14 @@ def test_keyboard_interrupt(run, tmpenvdir, monkeypatch):
                                           with_timeout=.0000001))
     with py.test.raises(Response) as response:
         run('envdir', str(tmpenvdir), 'sleep', '1')
-    # Minus sign is added by subprocess to distinguish signals from exit codes.
-    # Since we send a signal within the test to stop the process, it is the
-    # intended behaviour.
-    # signal.SIGINT is equivalent to KeyboardInterrupt on POSIX.
-    assert response.value.status == -signal.SIGINT
+    if platform.system() == 'Windows':
+        assert response.value.status == signal.SIGINT
+    else:
+        # Minus sign is added by subprocess to distinguish signals from exit
+        # codes. Since we send a signal within the test to stop the process,
+        # it is the intended behaviour.
+        # signal.SIGINT is equivalent to KeyboardInterrupt on POSIX.
+        assert response.value.status == -signal.SIGINT
 
 
 def test_shell(shell, tmpenvdir, capfd):
