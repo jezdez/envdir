@@ -69,7 +69,6 @@ environment variables can be found on the 12factor_ site.
 .. tip::
 
     Feel free to open tickets at https://github.com/jezdez/envdir/issues.
-    Say thanks at https://www.gittip.com/jezdez/.
 
 .. _12factor: http://12factor.net/config
 .. _daemontools: http://cr.yp.to/daemontools.html
