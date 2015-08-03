@@ -18,7 +18,7 @@ class VersionFinder(ast.NodeVisitor):
 
 
 def read(*parts):
-    return codecs.open(os.path.join(here, *parts), 'r').read()
+    return codecs.open(os.path.join(here, *parts), 'r', encoding='utf8').read()
 
 
 def find_version(*parts):
