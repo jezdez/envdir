@@ -117,6 +117,16 @@ line
     assert os.environ['MULTI_LINE'] == 'multi\nline'
 
 
+def test_space_at_end(run, tmpenvdir, monkeypatch):
+    """Space at end of envdir file."""
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
+    tmpenvdir.join('WITH_SPACE').write("with space ")
+    with py.test.raises(Response):
+        run('envdir', str(tmpenvdir), 'ls')
+    assert os.environ['WITH_SPACE'] == 'with space '
+
+
 def test_lowercase_var_names(run, tmpenvdir, monkeypatch):
     "Lowercase env var name"
     monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
