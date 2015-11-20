@@ -277,19 +277,13 @@ if 'READ_MAGIC' in os.environ:
         envdir.run('envdir', str(tmp))
     out, err = capfd.readouterr()
 
-    if py.std.sys.version_info[:2] == (2, 6):
-        assert response.value == 2
-    else:
-        assert response.value.code == 2
+    assert response.value.code == 2
     assert "incorrect number of arguments" in err
 
     with py.test.raises(SystemExit) as response:
         envdir.run()
     out, err = capfd.readouterr()
-    if py.std.sys.version_info[:2] == (2, 6):
-        assert response.value == 2
-    else:
-        assert response.value.code == 2
+    assert response.value.code == 2
 
 
 def test_read_existing_var(tmpenvdir):
