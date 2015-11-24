@@ -41,6 +41,8 @@ setup(name="envdir",
           'Programming Language :: Python :: 3.1',
           'Programming Language :: Python :: 3.2',
           'Programming Language :: Python :: 3.3',
+          'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3.5',
       ],
       description="A Python port of daemontools' envdir.",
       long_description=(read('README.rst') +
