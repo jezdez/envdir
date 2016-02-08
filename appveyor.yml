@@ -1,9 +1,11 @@
 build: false
 environment:
   matrix:
+    - TOXENV: "py26"
     - TOXENV: "py27"
     - TOXENV: "py33"
     - TOXENV: "py34"
+    - TOXENV: "py35"
     - TOXENV: "flake827"
     - TOXENV: "flake834"
 init:
