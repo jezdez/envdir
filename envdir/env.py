@@ -63,7 +63,7 @@ class Env(UserDict):
         if not os.path.exists(path):
             return default
         with self._open(name) as var:
-            return var.read().strip().replace('\x00', '\n')
+            return var.read().strip('\n').replace('\x00', '\n')
 
     def _set(self, name, value):
         if name in os.environ:
