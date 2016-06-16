@@ -23,7 +23,7 @@ Changelog
 
 * Vastly extended Python API.
 
-* Added Sphinx based docs: http://envdir.readthedocs.org/
+* Added Sphinx based docs: https://envdir.readthedocs.io/
 
 * Fixed killing child process when capturing keyboard interrupt.
 
