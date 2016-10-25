@@ -1,3 +1,4 @@
+import ctypes
 import functools
 import os
 import platform
@@ -33,6 +34,21 @@ def tmpenvdir(tmpdir):
 original_execvpe = os.execvpe
 
 
+if py.std.sys.platform == "win32" and py.std.sys.version_info[:2] == (2, 6):
+
+    def kill(pid, sig):
+        """
+        kill function for Win32
+        taken from https://docs.python.org/3/faq/windows.html#how-do-i-emulate-os-kill-in-windows
+        """
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.OpenProcess(1, 0, pid)
+        return (0 != kernel32.TerminateProcess(handle, 0))
+
+else:
+    kill = os.kill
+
+
 def mocked_execvpe(monkeypatch, name, args, env, with_timeout=None,
                    signal_type=signal.SIGINT):
     monkeypatch.setattr('os.execvpe', original_execvpe)
@@ -44,7 +60,7 @@ def mocked_execvpe(monkeypatch, name, args, env, with_timeout=None,
         if with_timeout:
 
             def killer(pid):
-                os.kill(pid, signal_type)
+                kill(pid, signal_type)
 
             timer = threading.Timer(with_timeout,
                                     functools.partial(killer, process.pid))
