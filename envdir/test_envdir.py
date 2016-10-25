@@ -34,7 +34,7 @@ def tmpenvdir(tmpdir):
 original_execvpe = os.execvpe
 
 
-if py.std.sys.platform == "win32" and py.std.sys.version_info[:2] == (2, 6):
+if platform.system() == 'Windows' and py.std.sys.version_info[:2] == (2, 6):
 
     def kill(pid, sig):
         """
@@ -238,6 +238,10 @@ def test_equal_sign(run, tmpenvdir, monkeypatch):
 timeout = py.path.local.sysfind('timeout') or py.path.local.sysfind('gtimeout')
 
 
+@pytest.mark.skipif(py.std.sys.version_info < (2, 7) and
+                    platform.system() == 'Windows',
+                    reason="os.kill doesn't work properly on "
+                           "Python < 2.7 on Windows")
 def test_keyboard_interrupt(run, tmpenvdir, monkeypatch):
     monkeypatch.setattr(os, 'execvpe',
                         functools.partial(mocked_execvpe,
@@ -246,10 +250,7 @@ def test_keyboard_interrupt(run, tmpenvdir, monkeypatch):
     with py.test.raises(Response) as response:
         run('envdir', str(tmpenvdir), 'sleep', '1')
     if platform.system() == 'Windows':
-        if py.std.sys.version_info[:2] == (2, 6):
-            assert response.value == signal.SIGINT
-        else:
-            assert response.value.code == signal.SIGINT
+        assert response.value.code == signal.SIGINT
     else:
         # Minus sign is added by subprocess to distinguish signals from exit
         # codes. Since we send a signal within the test to stop the process,
