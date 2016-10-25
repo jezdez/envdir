@@ -38,8 +38,7 @@ if platform.system() == 'Windows' and py.std.sys.version_info[:2] == (2, 6):
 
     def kill(pid, sig):
         """
-        kill function for Win32
-        taken from https://docs.python.org/3/faq/windows.html#how-do-i-emulate-os-kill-in-windows
+        kill function for Win32 taken from goo.gl/5FHcKr
         """
         kernel32 = ctypes.windll.kernel32
         handle = kernel32.OpenProcess(1, 0, pid)
