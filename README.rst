@@ -1,11 +1,11 @@
 envdir (Python port)
 ====================
 
-.. image:: https://api.travis-ci.org/jezdez/envdir.png
+.. image:: https://api.travis-ci.org/jezdez/envdir.svg
    :alt: Linux Build Status
    :target: https://travis-ci.org/jezdez/envdir
 
-.. image:: https://ci.appveyor.com/api/projects/status/0fh77wei6cj5hei5
+.. image:: https://ci.appveyor.com/api/projects/status/0fh77wei6cj5hei5?svg=true
    :alt: Windows Build Status
    :target: https://ci.appveyor.com/project/jezdez/envdir
 
