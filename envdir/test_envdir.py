@@ -250,7 +250,7 @@ def test_keyboard_interrupt(run, tmpenvdir, monkeypatch):
     with py.test.raises(Response) as response:
         run('envdir', str(tmpenvdir), 'sleep', '1')
     if platform.system() == 'Windows':
-        assert response.value.code == signal.SIGINT
+        assert response.value.status == signal.SIGINT
     else:
         # Minus sign is added by subprocess to distinguish signals from exit
         # codes. Since we send a signal within the test to stop the process,
