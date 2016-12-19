@@ -12,6 +12,10 @@ def isenvvar(name):
     return '=' not in name
 
 
+class _EmptyFile(Exception):
+    pass
+
+
 class Env(UserDict):
     """
     An dict-like object to represent an envdir environment with extensive
@@ -34,7 +38,10 @@ class Env(UserDict):
         self.clear()
 
     def __getitem__(self, name):
-        return self._get(name)
+        try:
+            return self._get(name)
+        except _EmptyFile:
+            pass
 
     def __setitem__(self, name, value):
         self._write(**{name: value})
@@ -52,8 +59,12 @@ class Env(UserDict):
     def _load(self):
         for path in filter(isenvvar, glob.glob(os.path.join(self.path, '*'))):
             root, name = os.path.split(path)
-            value = self._get(name)
-            self._set(name, value)
+            try:
+                value = self._get(name)
+            except _EmptyFile:
+                self._delete(name)
+            else:
+                self._set(name, value)
 
     def _open(self, name, mode='r'):
         return open(os.path.join(self.path, name), mode)
@@ -62,6 +73,8 @@ class Env(UserDict):
         path = os.path.join(self.path, name)
         if not os.path.exists(path):
             return default
+        if os.stat(path).st_size == 0:
+            raise _EmptyFile
         with self._open(name) as var:
             return var.read().strip('\n').replace('\x00', '\n')
 
@@ -69,10 +82,7 @@ class Env(UserDict):
         if name in os.environ:
             self.originals[name] = os.environ[name]
         self.data[name] = value
-        if value:
-            os.environ[name] = value
-        elif name in os.environ:
-            del os.environ[name]
+        os.environ[name] = value
 
     def _delete(self, name):
         if name in self.originals:

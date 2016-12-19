@@ -142,6 +142,16 @@ def test_space_at_end(run, tmpenvdir, monkeypatch):
     assert os.environ['WITH_SPACE'] == 'with space '
 
 
+def test_empty_value(run, tmpenvdir, monkeypatch):
+    """File with empty string"""
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
+    tmpenvdir.join('EMPTY_STRING').write('\n')
+    with py.test.raises(Response):
+        run('envdir', str(tmpenvdir), 'ls')
+    assert os.environ['EMPTY_STRING'] == ''
+
+
 def test_lowercase_var_names(run, tmpenvdir, monkeypatch):
     "Lowercase env var name"
     monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
