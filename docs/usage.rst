@@ -54,3 +54,16 @@ For example:
 To leave the subshell, simply use the ``exit`` command or press ``Ctrl+D``.
 
 .. _envdir: http://cr.yp.to/daemontools/envdir.html
+
+
+Setup an empty environment variable
+-----------------------------------
+
+Use an empty line to setup an empty environment variable (in contrast to an
+empty file, which would unset the environment variable):
+
+.. code-block:: console
+
+   $ echo > envdir/EMPTY_ENV
+   $ envdir envdir env | grep EMPTY_ENV
+   EMPTY_ENV=
