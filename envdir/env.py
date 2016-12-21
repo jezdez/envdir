@@ -1,4 +1,3 @@
-import glob
 import os
 
 try:
@@ -57,14 +56,15 @@ class Env(UserDict):
                 os.path.exists(os.path.join(self.path, name)))
 
     def _load(self):
-        for path in filter(isenvvar, glob.glob(os.path.join(self.path, '*'))):
-            root, name = os.path.split(path)
-            try:
-                value = self._get(name)
-            except _EmptyFile:
-                self._delete(name)
-            else:
-                self._set(name, value)
+        for _, _, files in os.walk(self.path, followlinks=True):
+            for path in filter(isenvvar, files):
+                root, name = os.path.split(path)
+                try:
+                    value = self._get(name)
+                except _EmptyFile:
+                    self._delete(name)
+                else:
+                    self._set(name, value)
 
     def _open(self, name, mode='r'):
         return open(os.path.join(self.path, name), mode)
