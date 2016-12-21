@@ -4,6 +4,7 @@ import os
 import platform
 import signal
 import subprocess
+import sys
 import threading
 
 import py
@@ -422,3 +423,20 @@ def test_context_manager_item(tmpenvdir):
         assert not tmpenvdir.join('CONTEXT_MANAGER_ITEM_SET').check()
     assert tmpenvdir.ensure('CONTEXT_MANAGER_ITEM_SET')
     assert 'CONTEXT_MANAGER_ITEM_SET' not in os.environ
+
+
+@pytest.mark.skipif(sys.platform == 'win32',
+                    reason="Symlinks are not supported on windows")
+def test_envdir_follows_symlinks(run, tmpenvdir, monkeypatch):
+    "Default cases."
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
+    tmpenvdir.join('DEFAULT').mksymlinkto('SYMLINK_ENV')
+    tmpenvdir.join('DEFAULT').write('test')
+    with py.test.raises(Response) as response:
+        run('envdir', str(tmpenvdir), 'ls')
+    assert 'DEFAULT' in os.environ
+    assert 'SYMLINK_ENV' in os.environ
+    assert os.environ['SYMLINK_ENV'] == 'test'
+    assert response.value.status == 0
+    assert response.value.message == ''
