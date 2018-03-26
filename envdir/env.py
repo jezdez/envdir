@@ -15,6 +15,14 @@ class _EmptyFile(Exception):
     pass
 
 
+try:
+    FileNotFoundError
+except NameError:  # <python3
+    FileNotFoundError = OSError
+
+_sentinel = object()
+
+
 class Env(UserDict):
     """
     An dict-like object to represent an envdir environment with extensive
@@ -36,11 +44,13 @@ class Env(UserDict):
     def __exit__(self, type, value, traceback):
         self.clear()
 
-    def __getitem__(self, name):
+    def __getitem__(self, name, default=_sentinel):
         try:
-            return self._get(name)
-        except _EmptyFile:
-            pass
+            return self._get(name, default=default)
+        except (_EmptyFile, FileNotFoundError):
+            if default is _sentinel:
+                raise KeyError(name)
+            return default
 
     def __setitem__(self, name, value):
         self._write(**{name: value})
@@ -69,12 +79,12 @@ class Env(UserDict):
     def _open(self, name, mode='r'):
         return open(os.path.join(self.path, name), mode)
 
-    def _get(self, name, default=None):
+    def _get(self, name, default=_sentinel):
         path = os.path.join(self.path, name)
-        if not os.path.exists(path):
-            return default
         if os.stat(path).st_size == 0:
             raise _EmptyFile
+        if not os.path.exists(path):
+            return default
         with self._open(name) as var:
             return var.read().strip('\n').replace('\x00', '\n')
 

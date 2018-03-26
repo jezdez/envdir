@@ -13,6 +13,11 @@ import pytest
 import envdir
 from envdir.runner import Response
 
+try:
+    FileNotFoundError
+except NameError:  # <python3
+    FileNotFoundError = OSError
+
 
 @pytest.fixture(scope="module")
 def run():
@@ -379,6 +384,10 @@ def test_dict_like(tmpenvdir):
     env.clear()
     assert list(env.items()) == []
     assert 'ITER' not in os.environ
+    with pytest.raises(KeyError):
+        env['DOESNOTEXISTS']
+    default = object()
+    assert env.get('DOESNOTEXISTS', default) is default
 
     with envdir.open(str(tmpenvdir)) as env:
         assert list(env.items()) == [('ITER', 'test')]
@@ -428,7 +437,7 @@ def test_context_manager_item(tmpenvdir):
 @pytest.mark.skipif(sys.platform == 'win32',
                     reason="Symlinks are not supported on windows")
 def test_envdir_follows_symlinks(run, tmpenvdir, monkeypatch):
-    "Default cases."
+    """Check envdir follows symbolic links"""
     monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
                                                          monkeypatch))
     tmpenvdir.join('DEFAULT').mksymlinkto('SYMLINK_ENV')
@@ -440,3 +449,16 @@ def test_envdir_follows_symlinks(run, tmpenvdir, monkeypatch):
     assert os.environ['SYMLINK_ENV'] == 'test'
     assert response.value.status == 0
     assert response.value.message == ''
+
+
+@pytest.mark.skipif(sys.platform == 'win32',
+                    reason="Symlinks are not supported on windows")
+def test_envdir_raise_broken_symlinks(run, tmpenvdir, monkeypatch):
+    """If broken symlink is encountered, raise loudly"""
+    monkeypatch.setattr(os, 'execvpe', functools.partial(mocked_execvpe,
+                                                         monkeypatch))
+    tmpenvdir.join('DEFAULT').mksymlinkto('SYMLINK_ENV')
+    tmpenvdir.join('DEFAULT').write('test')
+    tmpenvdir.join('SYMLINK_ENV').remove()
+    with pytest.raises(FileNotFoundError):
+        run('envdir', str(tmpenvdir), 'ls')
