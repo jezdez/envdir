@@ -1,6 +1,18 @@
 Changelog
 ---------
 
+
+1.0.0 (26/03/2018)
+^^^^^^^^^^^^^^^^^^
+
+* Drop python 2.6, 3.2 and 3.3
+
+* Add explicit support for python 3.6
+
+* Add support for symlinks
+
+* Improved support for windows
+
 0.7 (08/10/2014)
 ^^^^^^^^^^^^^^^^
 
