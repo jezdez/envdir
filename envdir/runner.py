@@ -108,3 +108,19 @@ class Runner(object):
                            (args[0], err), status=err.errno)
 
         raise Response()
+
+
+def go(caller, *args):
+    if not args:
+        args = sys.argv
+    try:
+        caller(args[0], *args[1:])
+    except Response as response:
+        if response.message:
+            sys.stderr.write(response.message)
+        sys.exit(response.status or 0)
+    else:
+        sys.exit(0)
+
+
+runner = Runner()
