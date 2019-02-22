@@ -6,6 +6,7 @@ environment:
     - TOXENV: "py34"
     - TOXENV: "py35"
     - TOXENV: "py36"
+    - TOXENV: "py37"
     - TOXENV: "flake827"
     - TOXENV: "flake836"
 init:
