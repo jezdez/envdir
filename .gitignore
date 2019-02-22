@@ -7,4 +7,3 @@ htmlcov
 .coverage
 docs/_build
 dist/
-**/*.pyc
