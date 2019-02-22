@@ -8,7 +8,7 @@ except ImportError:
 
 def isenvvar(name):
     root, name = os.path.split(name)
-    return '=' not in name
+    return "=" not in name
 
 
 class _EmptyFile(Exception):
@@ -28,6 +28,7 @@ class Env(UserDict):
     An dict-like object to represent an envdir environment with extensive
     API, can be used as context manager, too.
     """
+
     def __init__(self, path):
         self.path = path
         self.data = {}
@@ -62,8 +63,7 @@ class Env(UserDict):
         self._delete(name)
 
     def __contains__(self, name):
-        return (name in self.data or
-                os.path.exists(os.path.join(self.path, name)))
+        return name in self.data or os.path.exists(os.path.join(self.path, name))
 
     def _load(self):
         for _, _, files in os.walk(self.path, followlinks=True):
@@ -76,7 +76,7 @@ class Env(UserDict):
                 else:
                     self._set(name, value)
 
-    def _open(self, name, mode='r'):
+    def _open(self, name, mode="r"):
         return open(os.path.join(self.path, name), mode)
 
     def _get(self, name, default=_sentinel):
@@ -86,7 +86,7 @@ class Env(UserDict):
         if not os.path.exists(path):
             return default
         with self._open(name) as var:
-            return var.read().strip('\n').replace('\x00', '\n')
+            return var.read().strip("\n").replace("\x00", "\n")
 
     def _set(self, name, value):
         if name in os.environ:
@@ -104,7 +104,7 @@ class Env(UserDict):
 
     def _write(self, **values):
         for name, value in values.items():
-            with self._open(name, 'w') as env:
+            with self._open(name, "w") as env:
                 env.write(value)
 
     def clear(self):
