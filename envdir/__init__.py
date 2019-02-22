@@ -1,4 +1,4 @@
-from .__main__ import runner, go
+from .runner import runner, go
 from .env import Env  # noqa
 from .version import __version__  # noqa
 
