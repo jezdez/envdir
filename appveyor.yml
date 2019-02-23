@@ -6,8 +6,8 @@ environment:
     - TOXENV: "py34"
     - TOXENV: "py35"
     - TOXENV: "py36"
-    - TOXENV: "flake827"
-    - TOXENV: "flake836"
+    - TOXENV: "py37"
+    - TOXENV: "flake8"
 init:
   - "ECHO %TOXENV%"
   - ps: "ls C:\\Python*"
